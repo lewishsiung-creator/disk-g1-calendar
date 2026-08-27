@@ -155,6 +155,27 @@ body{
 .chip .zh{color:var(--ink-2);font-weight:400}
 .rail .sp{flex:1 1 auto}
 
+/* ---------- the key ----------
+   The two marks the grid depends on. The swatches are real .d cells so they
+   inherit the same dot and hatching the calendar draws — describing them in
+   words let the most important legend on the page read as a footnote. */
+.key{
+  display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;
+  background:var(--panel);border:1px solid var(--rule);border-left:3px solid var(--accent);
+  border-radius:var(--radius);padding:12px 16px;margin:0 0 16px;
+}
+.key-item{display:flex;align-items:center;gap:10px;min-width:0;flex:0 1 auto}
+/* The swatch also carries .d so it inherits the real dot and hatching, and .d
+   is defined later with width:100% — hence the two-class selector here, which
+   outranks it. Without this the swatch stretches across the whole row. */
+.key .key-sw{
+  position:relative;width:26px;min-width:26px;height:26px;aspect-ratio:auto;
+  border-radius:2px;flex:0 0 26px;
+}
+.key-txt{font-size:12.5px;line-height:1.4;min-width:0;flex:1 1 auto}
+.key-txt b{font-weight:700}
+.key-txt .zh{display:block;color:var(--ink-2);font-size:12px}
+
 /* ---------- months ---------- */
 .months{display:grid;grid-template-columns:repeat(auto-fill,minmax(336px,1fr));gap:var(--gap)}
 .mo{
@@ -294,8 +315,8 @@ footer .zh{color:var(--ink-3)}
 
 <div class="sec">
   <h2>The year<span class="zh">全年月曆</span></h2>
-  <div class="note" id="railNote"></div>
 </div>
+<div class="key" id="key"></div>
 <div class="rail" id="rail"></div>
 <div class="months" id="months"></div>
 
@@ -309,13 +330,13 @@ footer .zh{color:var(--ink-3)}
 <footer>
   <p><b>Source · 資料來源：</b>DISK School Calendar SY 2026–2027, <span id="revised"></span>. <span id="schoolline"></span></p>
   <p><b>&#8224;</b> Dec 5 is shaded as a SAT Weekend on the printed grid but is not written in December's list. It is a genuine College Board test date, so it is shown here.
-  <span class="zh">12 月 5 日在原始行事曆格子中標為 SAT 考試週末,但十二月文字清單未列出,此處仍予保留。</span></p>
+  <span class="zh">12 月 5 日在原始行事曆格子中標為 SAT 考試週末，但十二月文字清單未列出，此處仍予保留。</span></p>
   <p><b>&#8225;</b> The Christmas / Winter Break is shown as Dec 21–31. The printed calendar starts it on Dec 22; Dec 21 is off as well, per the school.
-  <span class="zh">聖誕寒假此處記為 12/21–31。原始行事曆自 12/22 起算,12/21 亦不到校,依學校資訊補入。</span></p>
+  <span class="zh">聖誕寒假此處記為 12/21–31。原始行事曆自 12/22 起算，12/21 亦不到校，依學校資訊補入。</span></p>
   <p><b>Formal Uniform is inferred</b>, not quoted — the calendar prints no uniform rules anywhere. It is read off the Mass, Assembly, Graduation and Blessing entries. School notice always wins.
-  <span class="zh">正式制服日為依 Mass／Assembly／Graduation 推定,行事曆本身未載明制服規定,一律以校方通知為準。</span></p>
+  <span class="zh">正式制服日為依 Mass／Assembly／Graduation 推定，行事曆本身未載明制服規定，一律以校方通知為準。</span></p>
   <p class="no-print">The school notes the calendar is revised from time to time to match government-mandated holidays.
-  <span class="zh">學校註明:行事曆會依政府公告假期不定期修訂。</span></p>
+  <span class="zh">學校註明：行事曆會依政府公告假期不定期修訂。</span></p>
 </footer>
 
 </div>
@@ -470,14 +491,14 @@ document.getElementById('qs').innerHTML = QUARTERS.map(q =>
     { c:'var(--accent)', en:'Formal Uniform', zh:'正式制服',
       n:(ruleDays + dayCount(uniform))+' days',
       cap:'Every Monday there is school, plus the Mass, Assembly and Graduation days. The calendar prints no uniform rules itself, so the ceremony days are a reading of it — school notice wins.'
-        + '<br><span class="zh">每個有上課的週一,加上彌撒與典禮當天。行事曆未載明制服規定,校方通知為準。</span>',
+        + '<br><span class="zh">每個有上課的週一，加上彌撒與典禮當天。行事曆未載明制服規定，校方通知為準。</span>',
       rows:[ruleRow, ...uniform.map(row)] },
     { c:'#c99a2e', en:'No School', zh:'不用上課', n:offDays+' days',
       cap:'National holidays plus four “No Students” staff days that are easy to miss — they are not public holidays.'
         + '<br><span class="zh">含 10/12、12/18、1/5、3/19 四天教職員活動日。</span>', rows:offEv.map(row) },
     { c:'var(--slate)', en:'Exams & Key Dates', zh:'考試與重要日期', n:keyEv.length+' dates',
       cap:'Examinations, assessments, report cards, and the days a parent attends or plans around.'
-        + '<br><span class="zh">考試、評量、成績單,以及需要家長出席或安排的日子。</span>', rows:keyEv.map(row) },
+        + '<br><span class="zh">考試、評量、成績單，以及需要家長出席或安排的日子。</span>', rows:keyEv.map(row) },
   ];
 
   document.getElementById('buckets').innerHTML = list.map(b => `
@@ -499,10 +520,17 @@ rail.innerHTML =
    <button class="chip" id="gradeOnly" aria-pressed="true">Grade 1 only<span class="zh">只看一年級</span></button>
    <button class="chip" id="offOnly" aria-pressed="false">Days off only<span class="zh">只看不到校日</span></button>
    <button class="chip" id="clearBtn">Show all<span class="zh">全部顯示</span></button>`;
-document.getElementById('railNote').innerHTML =
-  'A red dot marks a Formal Uniform day — every school Monday, plus the Mass and ceremony days. '
-  + 'Diagonal hatching means no school. '
-  + '<span class="zh">紅點為正式制服日(每個上課的週一,加上彌撒與典禮日),斜線為不到校日。</span>';
+document.getElementById('key').innerHTML = `
+  <div class="key-item">
+    <span class="key-sw d tinted uni" style="background:${CATS.institutional.color}"></span>
+    <span class="key-txt"><b>Formal Uniform</b> — every school Monday, plus Mass and ceremony days
+      <span class="zh">正式制服日：每個有上課的週一，加上彌撒與典禮當天</span></span>
+  </div>
+  <div class="key-item">
+    <span class="key-sw d tinted off" style="background:${CATS.holiday.color}"></span>
+    <span class="key-txt"><b>No school</b> — holidays and the “No Students” staff days
+      <span class="zh">不到校日：國定假日與教職員活動日</span></span>
+  </div>`;
 
 /* ---------- month grids ---------- */
 const monthsEl = document.getElementById('months');
