@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grade 1 at DISK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* ============================================================
+   Tokens. Light is the base; dark redefines only these values.
+   The pastel category fills live in data.js and are NOT tokens —
+   they are the school's own printed legend and must not drift,
+   so the page always sets dark ink on top of them.
+   ============================================================ */
+:root{
+  --paper:#f5f6f4;        /* cool stationery white, not cream */
+  --panel:#ffffff;
+  --ink:#1b1f23;          /* near-black, biased blue-green */
+  --ink-2:#5d6570;
+  --ink-3:#8b929a;
+  --rule:#dfe2dd;
+  --rule-soft:#ebedea;
+  --accent:#8c2f39;       /* liturgical red, used sparingly */
+  --accent-wash:#f3e7e8;
+  --slate:#2e4a62;
+  --cell-ink:#16191c;     /* always dark: sits on the pastel fills */
+  --focus:#2e4a62;
+  --radius:3px;
+  --gap:clamp(14px,2.2vw,18px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#141719; --panel:#1c2023; --ink:#e8eae6; --ink-2:#a6adb4;
+    --ink-3:#767d85; --rule:#2c3135; --rule-soft:#23272a;
+    --accent:#d0767e; --accent-wash:#2a1f21; --slate:#8fb3cd; --focus:#8fb3cd;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141719; --panel:#1c2023; --ink:#e8eae6; --ink-2:#a6adb4;
+  --ink-3:#767d85; --rule:#2c3135; --rule-soft:#23272a;
+  --accent:#d0767e; --accent-wash:#2a1f21; --slate:#8fb3cd; --focus:#8fb3cd;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",
+    "PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  font-size:15px; line-height:1.55; letter-spacing:-.002em;
+}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:2px}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+.sheet{max-width:1260px;margin:0 auto;padding:0 clamp(16px,3vw,32px) 80px}
+.zh{font-feature-settings:"palt" 1}
+
+/* ---------- identity ---------- */
+.id{padding:clamp(34px,5vw,56px) 0 0}
+.id .school{
+  font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:14px;
+}
+.id .school .zh{letter-spacing:.06em}
+.id h1{
+  font-family:Fraunces,Georgia,"Times New Roman",serif;
+  font-size:clamp(34px,6vw,58px);font-weight:600;line-height:1.02;
+  letter-spacing:-.025em;margin:0;text-wrap:balance;
+  font-variation-settings:"opsz" 120;
+}
+.id .h1zh{
+  font-size:clamp(15px,2.2vw,19px);color:var(--ink-2);font-weight:500;
+  margin-top:10px;letter-spacing:.02em;
+}
+.id .span{
+  margin-top:20px;padding-top:16px;border-top:1px solid var(--rule);
+  font-size:13.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:6px 22px;
+}
+.id .span b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ---------- status bar: one panel, three columns ---------- */
+.status{
+  display:grid;grid-template-columns:1.15fr 1.15fr 1fr;
+  border:1px solid var(--rule);background:var(--panel);
+  margin:26px 0 34px;border-radius:var(--radius);overflow:hidden;
+}
+.status > div{padding:17px 20px;min-width:0}
+.status > div + div{border-left:1px solid var(--rule)}
+.lbl{
+  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:9px;
+}
+.stat{font-size:17px;font-weight:600;line-height:1.28;letter-spacing:-.012em}
+.stat .zh{display:block;font-size:13px;font-weight:400;color:var(--ink-2);margin-top:2px}
+.stat + .stat{margin-top:7px;padding-top:7px;border-top:1px dotted var(--rule)}
+.meta{font-size:12.5px;color:var(--accent);font-weight:600;margin-top:9px;font-variant-numeric:tabular-nums}
+.qs{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;font-size:13px}
+.qs div{display:flex;justify-content:space-between;gap:8px;padding:1px 0}
+.qs span{color:var(--ink-2)}
+.qs b{font-variant-numeric:tabular-nums}
+.qs-tot{
+  margin-top:8px;padding-top:8px;border-top:1px solid var(--rule);
+  display:flex;justify-content:space-between;font-size:13px;font-weight:700;
+}
+
+/* ---------- section heads ---------- */
+.sec{
+  display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  flex-wrap:wrap;margin:0 0 15px;
+}
+.sec h2{
+  font-family:Fraunces,Georgia,serif;font-size:23px;font-weight:600;
+  letter-spacing:-.015em;margin:0;font-variation-settings:"opsz" 40;
+}
+.sec h2 .zh{font-family:"Public Sans",sans-serif;font-size:14px;font-weight:500;color:var(--ink-2);margin-left:10px}
+.sec .note{font-size:12.5px;color:var(--ink-3);max-width:44ch}
+
+/* ---------- parent buckets ---------- */
+.buckets{display:grid;grid-template-columns:repeat(auto-fit,minmax(292px,1fr));gap:var(--gap);margin-bottom:38px}
+.bk{
+  background:var(--panel);border:1px solid var(--rule);border-radius:var(--radius);
+  border-top:2px solid var(--bc);padding:16px 18px 6px;
+}
+.bk h3{
+  margin:0 0 4px;font-size:14.5px;font-weight:700;letter-spacing:-.008em;
+  display:flex;align-items:center;gap:9px;
+}
+.bk h3 .pip{width:9px;height:9px;border-radius:50%;background:var(--bc);flex:none}
+.bk h3 .zh{font-weight:500;color:var(--ink-2);font-size:13px}
+.bk h3 .n{
+  margin-left:auto;font-size:11px;font-weight:600;color:var(--ink-2);
+  background:var(--rule-soft);padding:2px 7px;border-radius:9px;
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.bk .cap{font-size:12px;color:var(--ink-2);margin:0 0 12px;line-height:1.5}
+.bk ul{list-style:none;margin:0;padding:0}
+.bk li{display:grid;grid-template-columns:60px 1fr;gap:11px;padding:6px 0;font-size:13px;align-items:start}
+.bk li + li{border-top:1px solid var(--rule-soft)}
+.bk .dt{text-align:right;color:var(--ink-2);font-weight:600;font-size:12px;font-variant-numeric:tabular-nums;padding-top:1px}
+.bk .zh{display:block;color:var(--ink-2);font-size:12px;margin-top:1px}
+
+/* ---------- controls ---------- */
+.rail{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:20px}
+.chip{
+  font:inherit;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink);
+  border:1px solid var(--rule);background:var(--panel);
+  padding:6px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;
+  transition:border-color .13s ease,background .13s ease;
+}
+.chip:hover{border-color:var(--ink-3)}
+.chip[aria-pressed="true"]{background:var(--accent-wash);border-color:var(--accent);color:var(--ink)}
+.chip .sw{width:10px;height:10px;border-radius:2px;border:1px solid rgba(0,0,0,.2);flex:none}
+.chip .zh{color:var(--ink-2);font-weight:400}
+.rail .sp{flex:1 1 auto}
+
+/* ---------- months ---------- */
+.months{display:grid;grid-template-columns:repeat(auto-fill,minmax(336px,1fr));gap:var(--gap)}
+.mo{
+  background:var(--panel);border:1px solid var(--rule);border-radius:var(--radius);
+  padding:15px 15px 4px;display:flex;flex-direction:column;scroll-margin-top:14px;
+}
+.mo > h3{margin:0 0 12px;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.mo .mn{font-family:Fraunces,Georgia,serif;font-size:17px;font-weight:600;letter-spacing:-.01em;font-variation-settings:"opsz" 30}
+.mo .mz{font-size:12.5px;color:var(--ink-2);font-weight:500}
+.mo .q{
+  margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.09em;
+  color:var(--ink-3);border:1px solid var(--rule);border-radius:2px;padding:1px 5px;
+}
+
+table{width:100%;border-collapse:separate;border-spacing:2px;table-layout:fixed}
+th{font-size:9.5px;font-weight:700;color:var(--ink-3);padding:0 0 6px;text-align:center;letter-spacing:.07em;text-transform:uppercase}
+th .zh{display:block;font-size:9.5px;font-weight:400;letter-spacing:0;opacity:.8;text-transform:none}
+td{padding:0}
+.d{
+  position:relative;width:100%;aspect-ratio:1/1;border:0;border-radius:2px;
+  background:transparent;color:var(--ink);font:inherit;font-size:12.5px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;padding:0;cursor:default;
+  font-variant-numeric:tabular-nums;
+}
+.d.tinted{color:var(--cell-ink)}          /* pastel fills stay light in both themes */
+.d.blank{visibility:hidden}
+.d.wknd{color:var(--ink-3);background:var(--rule-soft)}
+.d.has{cursor:pointer}
+.d.has:hover{box-shadow:inset 0 0 0 1.5px var(--ink-2)}
+.d.off::after{
+  content:"";position:absolute;inset:0;border-radius:2px;pointer-events:none;
+  background:repeating-linear-gradient(-45deg,transparent 0 3.5px,rgba(0,0,0,.15) 3.5px 5px);
+}
+.d.uni::before{
+  content:"";position:absolute;top:2.5px;right:2.5px;width:5px;height:5px;
+  border-radius:50%;background:var(--accent);pointer-events:none;
+}
+.d.today{box-shadow:0 0 0 2px var(--accent);font-weight:700}
+.d.dim{opacity:.26}
+.d[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--ink)}
+
+/* ---------- month event lists ---------- */
+.evs{list-style:none;margin:13px 0 0;padding:12px 0 0;border-top:1px solid var(--rule);flex:1}
+.evs li{display:grid;grid-template-columns:50px 1fr;gap:10px;padding:5px 0;font-size:12.5px;align-items:start}
+.evs li + li{border-top:1px solid var(--rule-soft)}
+.evs li.dim{opacity:.3}
+.evs li.hi{background:var(--accent-wash);box-shadow:0 0 0 6px var(--accent-wash);border-radius:2px;position:relative;z-index:1}
+.evs .dt{text-align:right;color:var(--ink-2);font-weight:600;font-size:11.5px;font-variant-numeric:tabular-nums;padding-top:1.5px}
+.evs .bd{min-width:0}
+.evs .en{display:flex;gap:7px;align-items:baseline}
+.evs .dot{width:8px;height:8px;border-radius:2px;flex:none;transform:translateY(1px);border:1px solid rgba(0,0,0,.2)}
+.evs .zh{color:var(--ink-2);font-size:12px;padding-left:15px;display:block}
+.tag{
+  display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;border-radius:2px;padding:1px 4px;margin-left:5px;
+  vertical-align:1.5px;white-space:nowrap;
+}
+.tag.no{color:#fff;background:var(--accent)}
+.tag.un{color:var(--accent);border:1px solid var(--accent)}
+.stat .tag{vertical-align:3px}
+.tag.sc{color:var(--slate);border:1px solid var(--slate)}
+.inf{color:var(--accent);font-weight:700;margin-left:3px;cursor:help}
+
+/* ---------- appendix + footer ---------- */
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:var(--radius);padding:17px 20px;margin-top:34px}
+.offlist{columns:3;column-gap:26px;list-style:none;margin:0;padding:0;font-size:13px}
+.offlist li{break-inside:avoid;padding:4px 0;display:grid;grid-template-columns:56px 1fr;gap:10px}
+.offlist .dt{text-align:right;color:var(--ink-2);font-weight:600;font-size:12px;font-variant-numeric:tabular-nums}
+.offlist .zh{display:block;color:var(--ink-2);font-size:12px}
+
+.dl{
+  display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;
+  border:1px solid var(--accent);color:var(--accent);background:transparent;
+  padding:6px 13px;border-radius:999px;text-decoration:none;
+}
+.dl:hover{background:var(--accent-wash)}
+.dl .zh{color:var(--ink-2);font-weight:400}
+
+footer{margin-top:38px;padding-top:20px;border-top:1px solid var(--rule);font-size:12px;color:var(--ink-2);line-height:1.6}
+footer p{margin:.5em 0;max-width:88ch}
+footer a{color:var(--accent)}
+footer b{color:var(--ink)}
+footer .zh{color:var(--ink-3)}
+
+@media (max-width:900px){
+  .status{grid-template-columns:1fr}
+  .status > div + div{border-left:0;border-top:1px solid var(--rule)}
+  .offlist{columns:2}
+}
+@media (max-width:560px){
+  body{font-size:14.5px}
+  .months{grid-template-columns:1fr}
+  .offlist{columns:1}
+  .qs{grid-template-columns:1fr}
+}
+@media print{
+  body{background:#fff}
+  .rail,.dl,footer .no-print{display:none}
+  .mo,.bk{break-inside:avoid}
+  .months{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<header class="id">
+  <div class="school" id="school"></div>
+  <h1 id="pageTitle"></h1>
+  <div class="h1zh zh" id="pageSub"></div>
+  <div class="span" id="span"></div>
+</header>
+
+<section class="status">
+  <div>
+    <div class="lbl">Today · 今天</div>
+    <div id="todayStat"></div>
+    <div class="meta" id="todayMeta"></div>
+  </div>
+  <div>
+    <div class="lbl">Next up · 接下來</div>
+    <div id="nextStat"></div>
+    <div class="meta" id="nextMeta"></div>
+  </div>
+  <div>
+    <div class="lbl">School days · 上課日數</div>
+    <div class="qs" id="qs"></div>
+    <div class="qs-tot"><span>Total · 全學年</span><b>180</b></div>
+  </div>
+</section>
+
+<div class="sec">
+  <h2>What to remember<span class="zh">家長重點</span></h2>
+  <a class="dl" id="icsLink" href="disk-g1-2026-2027.ics" download>Add to phone calendar<span class="zh">匯入手機日曆</span></a>
+</div>
+<div class="buckets" id="buckets"></div>
+
+<div class="sec">
+  <h2>The year<span class="zh">全年月曆</span></h2>
+  <div class="note" id="railNote"></div>
+</div>
+<div class="rail" id="rail"></div>
+<div class="months" id="months"></div>
+
+<section class="panel">
+  <div class="sec" style="margin-bottom:12px">
+    <h2 style="font-size:18px">Days off school<span class="zh">學生不到校日</span></h2>
+  </div>
+  <ul class="offlist" id="offlist"></ul>
+</section>
+
+<footer>
+  <p><b>Source · 資料來源：</b>DISK School Calendar SY 2026–2027, <span id="revised"></span>. <span id="schoolline"></span></p>
+  <p><b>&#8224;</b> Dec 5 is shaded as a SAT Weekend on the printed grid but is not written in December's list. It is a genuine College Board test date, so it is shown here.
+  <span class="zh">12 月 5 日在原始行事曆格子中標為 SAT 考試週末,但十二月文字清單未列出,此處仍予保留。</span></p>
+  <p><b>Formal Uniform is inferred</b>, not quoted — the calendar prints no uniform rules anywhere. It is read off the Mass, Assembly, Graduation and Blessing entries. School notice always wins.
+  <span class="zh">正式制服日為依 Mass／Assembly／Graduation 推定,行事曆本身未載明制服規定,一律以校方通知為準。</span></p>
+  <p class="no-print">The school notes the calendar is revised from time to time to match government-mandated holidays.
+  <span class="zh">學校註明:行事曆會依政府公告假期不定期修訂。</span></p>
+</footer>
+
+</div>
+
+<script src="data.js"></script>
+<script>
+/* ---------- date helpers (local time; never UTC, which shifts the day) ---------- */
+const pad = n => String(n).padStart(2,'0');
+const key = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+
+const MON_EN = ["January","February","March","April","May","June",
+                "July","August","September","October","November","December"];
+const MON_ZH = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+const DOW_EN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const DOW_ZH = ["日","一","二","三","四","五","六"];
+
+/* Which category colours a day that carries several events. */
+const PRIORITY = ["holiday","qstart","exam","institutional","student","curriculum","faculty","parents","sat"];
+
+/* ---------- index every day of the school year ---------- */
+const byDay = new Map();
+for (const ev of EVENTS) {
+  const end = parse(ev.e || ev.s);
+  for (let d = parse(ev.s); d <= end; d.setDate(d.getDate()+1)) {
+    const k = key(d);
+    if (!byDay.has(k)) byDay.set(k, []);
+    byDay.get(k).push(ev);
+  }
+}
+
+/* An event with no `only` is school-wide; otherwise it must name one of
+   the reader's grade tags. */
+const TAGS = GRADE_TAGS[GRADE] || [];
+const applies = ev => !ev.only || ev.only.some(t => TAGS.includes(t));
+
+const first = parse(SCHOOL.firstDay), last = parse(SCHOOL.lastDay);
+const inTerm = d => d >= first && d <= last;
+const isWeekend = d => d.getDay() === 0 || d.getDay() === 6;
+const isOff = d => inTerm(d) && !isWeekend(d) && (byDay.get(key(d)) || []).some(e => e.off);
+const topCat = evs => { for (const c of PRIORITY) { const h = evs.find(e => e.cat === c); if (h) return h.cat; } return null; };
+
+/* The two badges that change what you do that morning. Shared by the status
+   cards and the month lists so they can never disagree. */
+const badges = e =>
+  (e.off ? '<span class="tag no">no school</span>' : '') +
+  (e.uniform === true && applies(e) ? '<span class="tag un">uniform 制服</span>' : '');
+
+const mdy = d => `${MON_EN[d.getMonth()].slice(0,3)} ${d.getDate()}`;
+const range = ev => {
+  const a = parse(ev.s), b = parse(ev.e || ev.s);
+  if (+a === +b) return mdy(a);
+  return a.getMonth() === b.getMonth() ? `${mdy(a)}–${b.getDate()}` : `${mdy(a)}–${mdy(b)}`;
+};
+
+/* ---------- identity ---------- */
+document.getElementById('school').innerHTML =
+  `${SCHOOL.nameEn} <span class="zh">· ${SCHOOL.nameZh}</span>`;
+document.getElementById('pageTitle').textContent = PAGE.titleEn;
+document.getElementById('pageSub').textContent =
+  PAGE.subtitle ? `${PAGE.titleZh} · ${PAGE.subtitle}` : PAGE.titleZh;
+document.getElementById('revised').textContent = `${SCHOOL.revisedEn} · ${SCHOOL.revisedZh}`;
+document.getElementById('schoolline').innerHTML =
+  `${SCHOOL.addressZh} · ${SCHOOL.tel} · <a href="https://${SCHOOL.website}">${SCHOOL.website}</a>`;
+document.getElementById('span').innerHTML =
+  `<span>${SCHOOL.yearEn} <span class="zh">· ${SCHOOL.yearZh}</span></span>` +
+  `<span>First day <b>Aug 10, 2026</b></span>` +
+  `<span>Last day <b>May 31, 2027</b></span>`;
+
+/* ---------- status bar ---------- */
+const now = new Date(); now.setHours(0,0,0,0);
+const todayK = key(now);
+
+(function today(){
+  const evs = (byDay.get(todayK) || []).filter(applies);
+  const stat = t => `<div class="stat">${t}</div>`;
+  let html;
+  if (!inTerm(now))        html = stat(`Outside the school year<span class="zh">不在本學年範圍內</span>`);
+  else if (evs.length)     html = evs.map(e => stat(`${e.en}${badges(e)}<span class="zh">${e.zh}</span>`)).join('');
+  else if (isWeekend(now)) html = stat(`Weekend<span class="zh">週末</span>`);
+  else                     html = stat(`Regular school day<span class="zh">正常上課日</span>`);
+  document.getElementById('todayStat').innerHTML = html;
+  document.getElementById('todayMeta').textContent =
+    `${DOW_EN[now.getDay()]}, ${MON_EN[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()} · ` +
+    `${now.getFullYear()} 年 ${now.getMonth()+1} 月 ${now.getDate()} 日（週${DOW_ZH[now.getDay()]}）`;
+})();
+
+(function next(){
+  const up = EVENTS.filter(e => applies(e) && parse(e.e || e.s) >= now)
+                   .sort((a,b) => parse(a.s) - parse(b.s));
+  const el = document.getElementById('nextStat'), meta = document.getElementById('nextMeta');
+  if (!up.length) { el.innerHTML = `<div class="stat">Nothing left this year<span class="zh">本學年已結束</span></div>`; return; }
+  const d0 = parse(up[0].s);
+  const same = up.filter(e => +parse(e.s) === +d0);
+  el.innerHTML = same.map(e => `<div class="stat">${e.en}${badges(e)}<span class="zh">${e.zh}</span></div>`).join('');
+  const days = Math.round((d0 - now) / 86400000);
+  meta.textContent = `${range(same[0])}, ${d0.getFullYear()} — ` +
+    (days <= 0 ? 'happening now · 進行中' : days === 1 ? 'tomorrow · 明天' : `in ${days} days · ${days} 天後`);
+})();
+
+document.getElementById('qs').innerHTML = QUARTERS.map(q =>
+  `<div><span>Q${q.n} · 第 ${q.n} 階段</span><b>${q.days}</b></div>`).join('');
+
+/* ---------- the three parent buckets ---------- */
+(function buckets(){
+  const row = ev => `<li><span class="dt">${range(ev)}</span>
+    <span><span>${ev.en}</span><span class="zh">${ev.zh}</span></span></li>`;
+
+  /* Count distinct days, not entries — May 28 carries two events but is one day. */
+  const dayCount = list => {
+    const set = new Set();
+    for (const ev of list) {
+      const end = parse(ev.e || ev.s);
+      for (let d = parse(ev.s); d <= end; d.setDate(d.getDate()+1)) set.add(key(d));
+    }
+    return set.size;
+  };
+
+  const uniform = EVENTS.filter(e => e.uniform === true && applies(e));
+  const offEv   = EVENTS.filter(e => e.off);
+  const keyEv   = EVENTS.filter(e => e.key && applies(e));
+  const offDays = [...byDay.keys()].filter(k => isOff(parse(k))).length;
+
+  const list = [
+    { c:'var(--accent)', en:'Formal Uniform', zh:'正式制服', n:dayCount(uniform)+' days',
+      cap:'Read off the Mass, Assembly and Graduation entries — the calendar prints no uniform rules. School notice wins.'
+        + '<br><span class="zh">依 Mass／Assembly／Graduation 推定,校方通知為準。</span>', rows:uniform.map(row) },
+    { c:'#c99a2e', en:'No School', zh:'不用上課', n:offDays+' days',
+      cap:'National holidays plus four “No Students” staff days that are easy to miss — they are not public holidays.'
+        + '<br><span class="zh">含 10/12、12/18、1/5、3/19 四天教職員活動日。</span>', rows:offEv.map(row) },
+    { c:'var(--slate)', en:'Exams & Key Dates', zh:'考試與重要日期', n:keyEv.length+' dates',
+      cap:'Examinations, assessments, report cards, and the days a parent attends or plans around.'
+        + '<br><span class="zh">考試、評量、成績單,以及需要家長出席或安排的日子。</span>', rows:keyEv.map(row) },
+  ];
+
+  document.getElementById('buckets').innerHTML = list.map(b => `
+    <section class="bk" style="--bc:${b.c}">
+      <h3><span class="pip"></span>${b.en}<span class="zh">${b.zh}</span><span class="n">${b.n}</span></h3>
+      <p class="cap">${b.cap}</p>
+      <ul>${b.rows.join('')}</ul>
+    </section>`).join('');
+})();
+
+/* ---------- filter rail ---------- */
+const active = new Set();
+const rail = document.getElementById('rail');
+rail.innerHTML =
+  Object.entries(CATS).map(([k,c]) =>
+    `<button class="chip" data-cat="${k}" aria-pressed="false">
+       <span class="sw" style="background:${c.color}"></span>${c.en}<span class="zh">${c.zh}</span></button>`).join('') +
+  `<span class="sp"></span>
+   <button class="chip" id="gradeOnly" aria-pressed="true">Grade 1 only<span class="zh">只看一年級</span></button>
+   <button class="chip" id="offOnly" aria-pressed="false">Days off only<span class="zh">只看不到校日</span></button>
+   <button class="chip" id="clearBtn">Show all<span class="zh">全部顯示</span></button>`;
+document.getElementById('railNote').innerHTML =
+  'A red dot marks a Formal Uniform day. Diagonal hatching means no school. '
+  + '<span class="zh">紅點為正式制服日,斜線為不到校日。</span>';
+
+/* ---------- month grids ---------- */
+const monthsEl = document.getElementById('months');
+let selected = null;
+
+for (let i = 0; i < 10; i++) {
+  const y = i < 5 ? 2026 : 2027;
+  const m = i < 5 ? 7 + i : i - 5;              // Aug(7)…Dec(11), Jan(0)…May(4)
+  const nDays = new Date(y, m+1, 0).getDate();
+  const lead  = new Date(y, m, 1).getDay();
+
+  let cells = '';
+  for (let n = 0; n < lead; n++) cells += `<td><span class="d blank"></span></td>`;
+  for (let day = 1; day <= nDays; day++) {
+    const d = new Date(y, m, day), k = key(d);
+    const evs = byDay.get(k) || [];
+    const cat = topCat(evs);
+    const cls = ['d'];
+    let style = '';
+    /* A category colour always wins over weekend shading: the SAT Weekends and
+       a few parent events fall on Saturdays and would otherwise vanish. */
+    if (cat) { style = `background:${CATS[cat].color}`; cls.push('tinted'); }
+    else if (isWeekend(d)) cls.push('wknd');
+    if (evs.length) cls.push('has');
+    if (isOff(d)) cls.push('off');
+    if (evs.some(e => e.uniform === true && applies(e))) cls.push('uni');
+    if (k === todayK) cls.push('today');
+    const tag = evs.length ? 'button' : 'span';
+    const title = evs.map(e => e.en).join('; ').replace(/"/g,'&quot;');
+    cells += `<td><${tag} class="${cls.join(' ')}" style="${style}" data-day="${k}"`
+           + `${evs.length ? ` aria-pressed="false" title="${title}"` : ''}>${day}</${tag}></td>`;
+    if (d.getDay() === 6 && day < nDays) cells += `</tr><tr>`;
+  }
+
+  /* which quarters this month touches — the quarter is real structure, not decoration */
+  const qs = QUARTERS.filter(q => {
+    const a = parse(q.start), b = parse(q.end);
+    return !(b < new Date(y,m,1) || a > new Date(y,m,nDays));
+  }).map(q => 'Q' + q.n).join(' · ');
+
+  const monthEvents = EVENTS.filter(e => {
+    const a = parse(e.s), b = parse(e.e || e.s);
+    return (a.getFullYear() === y && a.getMonth() === m) || (b.getFullYear() === y && b.getMonth() === m);
+  });
+
+  const evHtml = monthEvents.map(e => {
+    const a = parse(e.s), b = parse(e.e || e.s);
+    const lbl = (+a === +b) ? `${a.getDate()}`
+      : (a.getMonth() === b.getMonth()) ? `${a.getDate()}–${b.getDate()}`
+      : `${mdy(a).toLowerCase()}–${b.getDate()}`;
+    return `<li data-cat="${e.cat}" data-s="${e.s}" data-e="${e.e || e.s}"
+        data-off="${e.off ? 1 : 0}" data-mine="${applies(e) ? 1 : 0}">
+      <span class="dt">${lbl}</span>
+      <span class="bd">
+        <span class="en"><span class="dot" style="background:${CATS[e.cat].color}"></span>
+          <span>${e.en}${badges(e)}${
+            e.only ? `<span class="tag sc">${e.only.join('/')} only</span>` : ''}${
+            e.inferred ? '<span class="inf" title="Shaded on the printed grid but not written in the month list">&#8224;</span>' : ''}</span></span>
+        <span class="zh">${e.zh}</span>
+      </span></li>`;
+  }).join('');
+
+  monthsEl.insertAdjacentHTML('beforeend', `
+    <section class="mo" id="m${i}">
+      <h3><span class="mn">${MON_EN[m]} ${y}</span><span class="mz zh">${y} 年 ${MON_ZH[m]}</span><span class="q">${qs}</span></h3>
+      <table><thead><tr>${DOW_EN.map((d,ix) =>
+        `<th>${d}<span class="zh">${DOW_ZH[ix]}</span></th>`).join('')}</tr></thead>
+        <tbody><tr>${cells}</tr></tbody></table>
+      <ul class="evs">${evHtml}</ul>
+    </section>`);
+}
+
+/* ---------- days-off appendix ---------- */
+(function offList(){
+  const out = [];
+  for (let d = new Date(first); d <= last; d.setDate(d.getDate()+1)) {
+    if (!isOff(d)) continue;
+    const e = (byDay.get(key(d)) || []).filter(x => x.off)[0];
+    out.push(`<li><span class="dt">${mdy(d)}</span>
+      <span><span>${e.en}</span><span class="zh">${e.zh}</span></span></li>`);
+  }
+  document.getElementById('offlist').innerHTML = out.join('');
+})();
+
+/* ---------- filtering ---------- */
+let offOnly = false, gradeOnly = true;
+function applyFilter(){
+  const on = active.size > 0 || offOnly;
+  document.querySelectorAll('.evs li').forEach(li => {
+    const keep = (!on
+        || (offOnly && li.dataset.off === '1')
+        || (active.size && active.has(li.dataset.cat)))
+      && (!gradeOnly || li.dataset.mine === '1');
+    li.classList.toggle('dim', !keep);
+  });
+  document.querySelectorAll('.d').forEach(el => {
+    const k = el.dataset.day; if (!k) return;
+    const all = byDay.get(k) || [];
+    /* A day with nothing on it is an ordinary school day, not a filtered-out
+       one — leave it alone whatever the filters say. */
+    if (!all.length) { el.classList.remove('dim'); return; }
+    const mine = all.filter(e => !gradeOnly || applies(e));
+    const keep = mine.length > 0 && (!on
+      || (offOnly && isOff(parse(k)))
+      || (active.size && mine.some(e => active.has(e.cat))));
+    el.classList.toggle('dim', !keep);
+  });
+}
+
+rail.addEventListener('click', e => {
+  const btn = e.target.closest('.chip'); if (!btn) return;
+  if (btn.id === 'clearBtn') {
+    active.clear(); offOnly = false; gradeOnly = false;
+    rail.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed','false'));
+  } else if (btn.id === 'gradeOnly') {
+    gradeOnly = !gradeOnly; btn.setAttribute('aria-pressed', String(gradeOnly));
+  } else if (btn.id === 'offOnly') {
+    offOnly = !offOnly; btn.setAttribute('aria-pressed', String(offOnly));
+  } else {
+    const c = btn.dataset.cat;
+    active.has(c) ? active.delete(c) : active.add(c);
+    btn.setAttribute('aria-pressed', String(active.has(c)));
+  }
+  applyFilter();
+});
+
+/* ---------- tap a day to highlight its events ---------- */
+monthsEl.addEventListener('click', e => {
+  const cell = e.target.closest('.d.has'); if (!cell) return;
+  const k = cell.dataset.day, wasOn = selected === k;
+  document.querySelectorAll('.d[aria-pressed="true"]').forEach(c => c.setAttribute('aria-pressed','false'));
+  document.querySelectorAll('.evs li.hi').forEach(li => li.classList.remove('hi'));
+  if (wasOn) { selected = null; return; }
+  selected = k;
+  cell.setAttribute('aria-pressed','true');
+  const d = parse(k);
+  document.querySelectorAll('.evs li').forEach(li => {
+    if (d >= parse(li.dataset.s) && d <= parse(li.dataset.e)) li.classList.add('hi');
+  });
+});
+
+applyFilter();   /* the Grade 1 lens starts on */
+
+/* "Jump to this month" — offered, not forced, so the page still opens at the top. */
+if (inTerm(now)) {
+  const ix = now.getFullYear() === 2026 ? now.getMonth() - 7 : now.getMonth() + 5;
+  const el = document.getElementById('m' + ix);
+  if (el) {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.innerHTML = 'Jump to this month<span class="zh">跳到本月</span>';
+    b.addEventListener('click', () => el.scrollIntoView({behavior:'smooth', block:'start'}));
+    rail.appendChild(b);
+  }
+}
+</script>
+</body>
+</html>
