@@ -4,7 +4,12 @@ A bilingual (English + 繁體中文) month-grid version of the Dominican
 International School Kaohsiung calendar for School Year 2026–2027, for Grade 1
 families.
 
-**Live:** https://disk-g1-calendar.pages.dev
+**Live:**
+
+- https://disk-g1-calendar.pages.dev  (Cloudflare Pages — deploys in seconds)
+- https://lewishsiung-creator.github.io/disk-g1-calendar/  (GitHub Pages)
+
+Both deploy automatically from `main`.
 
 It answers the three questions a calendar on the wall makes you hunt for:
 
