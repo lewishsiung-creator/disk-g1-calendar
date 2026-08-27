@@ -310,6 +310,8 @@ footer .zh{color:var(--ink-3)}
   <p><b>Source · 資料來源：</b>DISK School Calendar SY 2026–2027, <span id="revised"></span>. <span id="schoolline"></span></p>
   <p><b>&#8224;</b> Dec 5 is shaded as a SAT Weekend on the printed grid but is not written in December's list. It is a genuine College Board test date, so it is shown here.
   <span class="zh">12 月 5 日在原始行事曆格子中標為 SAT 考試週末,但十二月文字清單未列出,此處仍予保留。</span></p>
+  <p><b>&#8225;</b> The Christmas / Winter Break is shown as Dec 21–31. The printed calendar starts it on Dec 22; Dec 21 is off as well, per the school.
+  <span class="zh">聖誕寒假此處記為 12/21–31。原始行事曆自 12/22 起算,12/21 亦不到校,依學校資訊補入。</span></p>
   <p><b>Formal Uniform is inferred</b>, not quoted — the calendar prints no uniform rules anywhere. It is read off the Mass, Assembly, Graduation and Blessing entries. School notice always wins.
   <span class="zh">正式制服日為依 Mass／Assembly／Graduation 推定,行事曆本身未載明制服規定,一律以校方通知為準。</span></p>
   <p class="no-print">The school notes the calendar is revised from time to time to match government-mandated holidays.
@@ -354,6 +356,16 @@ const first = parse(SCHOOL.firstDay), last = parse(SCHOOL.lastDay);
 const inTerm = d => d >= first && d <= last;
 const isWeekend = d => d.getDay() === 0 || d.getDay() === 6;
 const isOff = d => inTerm(d) && !isWeekend(d) && (byDay.get(key(d)) || []).some(e => e.off);
+
+/* Uniform comes from two places: the standing weekday rule, and the individual
+   Mass / Assembly / Graduation entries. Either makes the day a uniform day —
+   but never a day with no school. */
+const isRuleUniform = d =>
+  inTerm(d) && !isWeekend(d) && !isOff(d) && UNIFORM_WEEKDAYS.includes(d.getDay());
+const isUniformDay = d =>
+  isRuleUniform(d) ||
+  (inTerm(d) && !isOff(d) &&
+   (byDay.get(key(d)) || []).some(e => e.uniform === true && applies(e)));
 const topCat = evs => { for (const c of PRIORITY) { const h = evs.find(e => e.cat === c); if (h) return h.cat; } return null; };
 
 /* The two badges that change what you do that morning. Shared by the status
@@ -390,11 +402,16 @@ const todayK = key(now);
 (function today(){
   const evs = (byDay.get(todayK) || []).filter(applies);
   const stat = t => `<div class="stat">${t}</div>`;
+  /* On a plain Monday there is no event to hang the badge on, so it is added
+     from the date instead. */
+  const uni = isUniformDay(now) ? '<span class="tag un">uniform 制服</span>' : '';
   let html;
   if (!inTerm(now))        html = stat(`Outside the school year<span class="zh">不在本學年範圍內</span>`);
-  else if (evs.length)     html = evs.map(e => stat(`${e.en}${badges(e)}<span class="zh">${e.zh}</span>`)).join('');
+  else if (evs.length)     html = stat(`${evs[0].en}${badges(evs[0])}${
+                                   evs[0].uniform === true ? '' : uni}<span class="zh">${evs[0].zh}</span>`)
+                                 + evs.slice(1).map(e => stat(`${e.en}${badges(e)}<span class="zh">${e.zh}</span>`)).join('');
   else if (isWeekend(now)) html = stat(`Weekend<span class="zh">週末</span>`);
-  else                     html = stat(`Regular school day<span class="zh">正常上課日</span>`);
+  else                     html = stat(`Regular school day${uni}<span class="zh">正常上課日</span>`);
   document.getElementById('todayStat').innerHTML = html;
   document.getElementById('todayMeta').textContent =
     `${DOW_EN[now.getDay()]}, ${MON_EN[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()} · ` +
@@ -432,15 +449,29 @@ document.getElementById('qs').innerHTML = QUARTERS.map(q =>
     return set.size;
   };
 
-  const uniform = EVENTS.filter(e => e.uniform === true && applies(e));
+  /* The weekday rule is stated once, not listed 34 times — otherwise the
+     exceptions it exists to complement get buried. */
+  let ruleDays = 0;
+  for (let d = new Date(first); d <= last; d.setDate(d.getDate()+1)) if (isRuleUniform(d)) ruleDays++;
+  const DOW_LONG = ["Sundays","Mondays","Tuesdays","Wednesdays","Thursdays","Fridays","Saturdays"];
+  const ruleRow = `<li><span class="dt">every</span>
+    <span><span><b>${UNIFORM_WEEKDAYS.map(i => DOW_LONG[i]).join(' & ')}</b> there is school
+      <span class="tag un">${ruleDays} days</span></span>
+      <span class="zh">每個有上課的週${UNIFORM_WEEKDAYS.map(i => DOW_ZH[i]).join('、')}</span></span></li>`;
+
+  /* Only the days the standing rule does not already cover. */
+  const uniform = EVENTS.filter(e =>
+    e.uniform === true && applies(e) && !isRuleUniform(parse(e.s)));
   const offEv   = EVENTS.filter(e => e.off);
   const keyEv   = EVENTS.filter(e => e.key && applies(e));
   const offDays = [...byDay.keys()].filter(k => isOff(parse(k))).length;
 
   const list = [
-    { c:'var(--accent)', en:'Formal Uniform', zh:'正式制服', n:dayCount(uniform)+' days',
-      cap:'Read off the Mass, Assembly and Graduation entries — the calendar prints no uniform rules. School notice wins.'
-        + '<br><span class="zh">依 Mass／Assembly／Graduation 推定,校方通知為準。</span>', rows:uniform.map(row) },
+    { c:'var(--accent)', en:'Formal Uniform', zh:'正式制服',
+      n:(ruleDays + dayCount(uniform))+' days',
+      cap:'Every Monday there is school, plus the Mass, Assembly and Graduation days. The calendar prints no uniform rules itself, so the ceremony days are a reading of it — school notice wins.'
+        + '<br><span class="zh">每個有上課的週一,加上彌撒與典禮當天。行事曆未載明制服規定,校方通知為準。</span>',
+      rows:[ruleRow, ...uniform.map(row)] },
     { c:'#c99a2e', en:'No School', zh:'不用上課', n:offDays+' days',
       cap:'National holidays plus four “No Students” staff days that are easy to miss — they are not public holidays.'
         + '<br><span class="zh">含 10/12、12/18、1/5、3/19 四天教職員活動日。</span>', rows:offEv.map(row) },
@@ -469,8 +500,9 @@ rail.innerHTML =
    <button class="chip" id="offOnly" aria-pressed="false">Days off only<span class="zh">只看不到校日</span></button>
    <button class="chip" id="clearBtn">Show all<span class="zh">全部顯示</span></button>`;
 document.getElementById('railNote').innerHTML =
-  'A red dot marks a Formal Uniform day. Diagonal hatching means no school. '
-  + '<span class="zh">紅點為正式制服日,斜線為不到校日。</span>';
+  'A red dot marks a Formal Uniform day — every school Monday, plus the Mass and ceremony days. '
+  + 'Diagonal hatching means no school. '
+  + '<span class="zh">紅點為正式制服日(每個上課的週一,加上彌撒與典禮日),斜線為不到校日。</span>';
 
 /* ---------- month grids ---------- */
 const monthsEl = document.getElementById('months');
@@ -496,7 +528,7 @@ for (let i = 0; i < 10; i++) {
     else if (isWeekend(d)) cls.push('wknd');
     if (evs.length) cls.push('has');
     if (isOff(d)) cls.push('off');
-    if (evs.some(e => e.uniform === true && applies(e))) cls.push('uni');
+    if (isUniformDay(d)) cls.push('uni');
     if (k === todayK) cls.push('today');
     const tag = evs.length ? 'button' : 'span';
     const title = evs.map(e => e.en).join('; ').replace(/"/g,'&quot;');
@@ -528,7 +560,8 @@ for (let i = 0; i < 10; i++) {
         <span class="en"><span class="dot" style="background:${CATS[e.cat].color}"></span>
           <span>${e.en}${badges(e)}${
             e.only ? `<span class="tag sc">${e.only.join('/')} only</span>` : ''}${
-            e.inferred ? '<span class="inf" title="Shaded on the printed grid but not written in the month list">&#8224;</span>' : ''}</span></span>
+            e.inferred ? '<span class="inf" title="Shaded on the printed grid but not written in the month list">&#8224;</span>' : ''}${
+            e.added ? `<span class="inf" title="Differs from the printed calendar: ${e.added}">&#8225;</span>` : ''}</span></span>
         <span class="zh">${e.zh}</span>
       </span></li>`;
   }).join('');

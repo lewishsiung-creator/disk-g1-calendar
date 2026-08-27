@@ -52,6 +52,11 @@ const CATS = {
    The school does not print uniform requirements, so `uniform` is an inference,
    not a quotation. School notice always wins. */
 
+/* Days of the week that are Formal Uniform by standing rule, regardless of what
+   is on the calendar (0 = Sunday). A Monday that is a holiday or a "No Students"
+   day is not one — the rule only applies when there is school. */
+const UNIFORM_WEEKDAYS = [1];   // Monday
+
 /* Quarter boundaries, read off the "Quarter Begins" entries. */
 const QUARTERS = [
   { n: 1, start: "2026-08-10", end: "2026-10-12", days: 42 },
@@ -110,7 +115,8 @@ const EVENTS = [
   { s:"2026-12-16",                 cat:"institutional", en:"Rehearsals", zh:"彩排" },
   { s:"2026-12-17",                 cat:"institutional", en:"Christmas Mass & Parties (AM) · Christmas Concert (PM)", zh:"上午：聖誕彌撒暨聖誕派對／下午：聖誕音樂會", uniform:true },
   { s:"2026-12-18",                 cat:"faculty",       en:"Faculty & Staff Activity (No Students)", zh:"教職員活動（學生不到校）", off:true },
-  { s:"2026-12-22", e:"2026-12-31", cat:"holiday",       en:"Christmas / Winter Break", zh:"聖誕節暨寒假", off:true },
+  // The printed calendar says 22-31; Dec 21 is off as well, per the school.
+  { s:"2026-12-21", e:"2026-12-31", cat:"holiday",       en:"Christmas / Winter Break", zh:"聖誕節暨寒假", off:true, added:"the printed calendar starts this on Dec 22" },
   { s:"2026-12-25",                 cat:"holiday",       en:"Christmas Day / Taiwan Constitution Day", zh:"聖誕節／行憲紀念日", off:true },
 
   // ---- January 2027 ----

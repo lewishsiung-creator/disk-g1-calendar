@@ -13,10 +13,12 @@ Both deploy automatically from `main`.
 
 It answers the three questions a calendar on the wall makes you hunt for:
 
-- **Formal Uniform** — the 12 days read off the Mass, Assembly and Graduation
-  entries. The school calendar prints no uniform rules anywhere, so this is a
-  reading of the schedule, not a quotation from it. **School notice always wins.**
-- **No school** — 32 days, including the four "No Students" staff days
+- **Formal Uniform** — 44 days: **every Monday there is school** (33 of them),
+  plus the 11 Mass, Assembly and Graduation days that fall on other weekdays. A
+  Monday that is a holiday is not one. The school calendar prints no uniform
+  rules anywhere, so the ceremony days are a reading of the schedule rather than
+  a quotation from it. **School notice always wins.**
+- **No school** — 33 days, including the four "No Students" staff days
   (Oct 12, Dec 18, Jan 5, Mar 19) that are easy to miss because they are not
   public holidays.
 - **Exams and key dates** — examinations, assessments, report cards, and the
@@ -41,6 +43,8 @@ Two readings of the source worth knowing:
 - **There are two Parent-Teacher Conferences**: Nov 16–20 and Apr 19–23. The
   November one is written on an unnumbered continuation line under Career
   Awareness Week, which makes it easy to miss.
+- **Dec 21** is shown as part of the Christmas break. The printed calendar
+  starts the break on Dec 22; Dec 21 is off as well, per the school. Marked ‡.
 - **Dec 5** is shaded as a SAT Weekend on the printed grid but is not written in
   December's list. It is a genuine College Board test date, so it is shown here,
   marked with a †.
