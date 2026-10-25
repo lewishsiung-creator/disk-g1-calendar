@@ -125,6 +125,15 @@ body{
 .bk li + li{border-top:1px solid var(--hairline)}
 .bk .dt{text-align:right;color:var(--ink-2);font-size:13px;font-variant-numeric:tabular-nums;padding-top:2px}
 .bk .zh{display:block;color:var(--ink-2);font-size:13px;margin-top:1px}
+.bk.fold li:not(.keep),.panel.fold .offlist li:not(.keep){display:none}
+.more{
+  font:inherit;font-size:14px;color:var(--link);background:none;border:0;cursor:pointer;
+  padding:12px 0;display:flex;align-items:center;gap:7px;width:100%;letter-spacing:-.012em;
+}
+.more::after{content:"";width:6px;height:6px;border-right:1.6px solid currentColor;
+  border-bottom:1.6px solid currentColor;transform:translateY(-2px) rotate(45deg)}
+.more[aria-expanded="true"]::after{transform:translateY(1px) rotate(-135deg)}
+.more .zh{color:var(--link);opacity:.75}
 
 /* ---------- the key ----------
    The two marks the grid depends on. The swatches are real .d cells so they
@@ -251,6 +260,25 @@ footer .zh{color:var(--ink-3)}
   .offlist{columns:1}
   .qs{grid-template-columns:1fr}
   .status > div,.bk,.mo,.panel,.key{padding-left:18px;padding-right:18px}
+  .chip{min-height:44px;padding:11px 18px}   /* iOS minimum tap target */
+  /* Stacked, these 13 pills cost a screen and a half before the first month.
+     One swipeable row is the iOS pattern, and the three controls worth having
+     on a phone come first — the colour filters scroll off to the right. */
+  .rail{
+    flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+    scroll-snap-type:x proximity;padding-bottom:2px;
+    margin-left:calc(-1 * max(16px,env(safe-area-inset-left,0px)));
+    margin-right:calc(-1 * max(16px,env(safe-area-inset-right,0px)));
+    padding-left:max(16px,env(safe-area-inset-left,0px));
+    padding-right:max(16px,env(safe-area-inset-right,0px));
+  }
+  .rail::-webkit-scrollbar{display:none}
+  .rail .chip{flex:none;scroll-snap-align:start}
+  .rail .sp{display:none}
+  #jumpBtn{order:-3}
+  #offOnly{order:-2}
+  #gradeOnly{order:-1}
 }
 @media print{
   body{background:#fff}
@@ -438,8 +466,23 @@ document.getElementById('qs').innerHTML = QUARTERS.map(q =>
 
 /* ---------- the three parent buckets ---------- */
 (function buckets(){
-  const row = ev => `<li><span class="dt">${range(ev)}</span>
+  const row = (ev, cls='') => `<li class="${cls}"><span class="dt">${range(ev)}</span>
     <span><span>${ev.en}</span><span class="zh">${ev.zh}</span></span></li>`;
+
+  /* On a phone these three lists stack into a wall of 21 screens, and they
+     start in August — so a parent in October scrolls past two months of
+     history to reach anything useful. Collapsed, each shows what is still
+     ahead; the button opens the whole year. An entry counts as ahead until
+     its last day, so a run in progress stays visible. */
+  const AHEAD = 6;
+  const build = items => {
+    let shown = 0;
+    return items.map(ev => {
+      const ahead = parse(ev.e || ev.s) >= now;
+      if (ahead && shown < AHEAD) { shown++; return row(ev, 'keep'); }
+      return row(ev);
+    });
+  };
 
   /* Count distinct days, not entries — May 28 carries two events but is one day. */
   const dayCount = list => {
@@ -456,7 +499,7 @@ document.getElementById('qs').innerHTML = QUARTERS.map(q =>
   let ruleDays = 0;
   for (let d = new Date(first); d <= last; d.setDate(d.getDate()+1)) if (isRuleUniform(d)) ruleDays++;
   const DOW_LONG = ["Sundays","Mondays","Tuesdays","Wednesdays","Thursdays","Fridays","Saturdays"];
-  const ruleRow = `<li><span class="dt">every</span>
+  const ruleRow = `<li class="keep"><span class="dt">every</span>
     <span><span><b>${UNIFORM_WEEKDAYS.map(i => DOW_LONG[i]).join(' & ')}</b> there is school
       <span class="tag un">${ruleDays} days</span></span>
       <span class="zh">每個有上課的週${UNIFORM_WEEKDAYS.map(i => DOW_ZH[i]).join('、')}</span></span></li>`;
@@ -473,22 +516,35 @@ document.getElementById('qs').innerHTML = QUARTERS.map(q =>
       n:(ruleDays + dayCount(uniform))+' days',
       cap:'Every Monday there is school, plus the Mass, Assembly and Graduation days. The calendar prints no uniform rules itself, so the ceremony days are a reading of it — school notice wins.'
         + '<br><span class="zh">每個有上課的週一，加上彌撒與典禮當天。行事曆未載明制服規定，校方通知為準。</span>',
-      rows:[ruleRow, ...uniform.map(row)] },
+      rows:[ruleRow, ...build(uniform)] },
     { c:'#f5a623', en:'No School', zh:'不用上課', n:offDays+' days',
       cap:'National holidays plus four “No Students” staff days that are easy to miss — they are not public holidays.'
-        + '<br><span class="zh">含 10/12、12/18、1/5、3/19 四天教職員活動日。</span>', rows:offEv.map(row) },
+        + '<br><span class="zh">含 10/12、12/18、1/5、3/19 四天教職員活動日。</span>', rows:build(offEv) },
     { c:'var(--link)', en:'Exams & Key Dates', zh:'考試與重要日期', n:keyEv.length+' dates',
       cap:'Examinations, assessments, report cards, and the days a parent attends or plans around.'
-        + '<br><span class="zh">考試、評量、成績單，以及需要家長出席或安排的日子。</span>', rows:keyEv.map(row) },
+        + '<br><span class="zh">考試、評量、成績單，以及需要家長出席或安排的日子。</span>', rows:build(keyEv) },
   ];
 
-  document.getElementById('buckets').innerHTML = list.map(b => `
-    <section class="bk" style="--bc:${b.c}">
+  document.getElementById('buckets').innerHTML = list.map(b => {
+    const folded = b.rows.filter(r => !r.includes('class="keep"')).length;
+    return `
+    <section class="bk${folded ? ' fold' : ''}" style="--bc:${b.c}">
       <h3><span class="pip"></span><span class="t">${b.en}</span><span class="n">${b.n}</span></h3>
       <div class="bzh zh">${b.zh}</div>
       <p class="cap">${b.cap}</p>
       <ul>${b.rows.join('')}</ul>
-    </section>`).join('');
+      ${folded ? `<button class="more" aria-expanded="false"
+        data-less="Show less<span class='zh'>收合</span>"
+        data-more="Show the whole year<span class='zh'>顯示全年 ${b.rows.length} 筆</span>"
+        >Show the whole year<span class="zh">顯示全年 ${b.rows.length} 筆</span></button>` : ''}
+    </section>`;}).join('');
+
+  document.getElementById('buckets').addEventListener('click', e => {
+    const btn = e.target.closest('.more'); if (!btn) return;
+    const sec = btn.closest('.bk'), open = sec.classList.toggle('fold') === false;
+    btn.setAttribute('aria-expanded', String(open));
+    btn.innerHTML = open ? btn.dataset.less : btn.dataset.more;
+  });
 })();
 
 /* ---------- filter rail ---------- */
@@ -589,13 +645,33 @@ for (let i = 0; i < 10; i++) {
 /* ---------- days-off appendix ---------- */
 (function offList(){
   const out = [];
+  let ahead = 0;
   for (let d = new Date(first); d <= last; d.setDate(d.getDate()+1)) {
     if (!isOff(d)) continue;
     const e = (byDay.get(key(d)) || []).filter(x => x.off)[0];
-    out.push(`<li><span class="dt">${mdy(d)}</span>
+    /* Same reasoning as the buckets: the days still to come first, the rest
+       behind the control. 33 rows is most of a phone screen on its own. */
+    const keep = d >= now && ahead < 8 ? (ahead++, 'keep') : '';
+    out.push(`<li class="${keep}"><span class="dt">${mdy(d)}</span>
       <span><span>${e.en}</span><span class="zh">${e.zh}</span></span></li>`);
   }
   document.getElementById('offlist').innerHTML = out.join('');
+  const panel = document.getElementById('offlist').closest('.panel');
+  const folded = out.filter(r => !r.includes('class="keep"')).length;
+  if (!folded) return;
+  panel.classList.add('fold');
+  const btn = document.createElement('button');
+  btn.className = 'more';
+  btn.setAttribute('aria-expanded','false');
+  btn.dataset.more = `Show all ${out.length}<span class="zh">顯示全部 ${out.length} 天</span>`;
+  btn.dataset.less = 'Show less<span class="zh">收合</span>';
+  btn.innerHTML = btn.dataset.more;
+  btn.addEventListener('click', () => {
+    const open = panel.classList.toggle('fold') === false;
+    btn.setAttribute('aria-expanded', String(open));
+    btn.innerHTML = open ? btn.dataset.less : btn.dataset.more;
+  });
+  panel.appendChild(btn);
 })();
 
 /* ---------- filtering ---------- */
@@ -664,6 +740,7 @@ if (inTerm(now)) {
   if (el) {
     const b = document.createElement('button');
     b.className = 'chip';
+    b.id = 'jumpBtn';
     b.innerHTML = 'Jump to this month<span class="zh">跳到本月</span>';
     b.addEventListener('click', () => el.scrollIntoView({behavior:'smooth', block:'start'}));
     rail.appendChild(b);
