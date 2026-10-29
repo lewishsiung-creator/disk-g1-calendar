@@ -28,6 +28,9 @@
   --link:#0066cc;        /* Apple's link blue */
   --red:#ff3b30;         /* system red — semantic, kept apart from the accent */
   --cell-ink:#1d1d1f;    /* always dark: sits on the light pastel fills */
+  --uni-fill:#ffdad6;    /* parent view: wear the uniform */
+  --uni-ink:#1d1d1f;     /* flips with the theme, unlike --cell-ink */
+  --off-fill:#e8e8ed;    /* parent view: no school */
   --r-sm:12px;
   --r-card:18px;
   --pill:980px;
@@ -42,6 +45,7 @@
     --bg:#000000; --surface:#1d1d1f; --well:#2c2c2e;
     --ink:#f5f5f7; --ink-2:#a1a1a6; --ink-3:#86868b; --hairline:#424245;
     --blue:#0071e3; --link:#2997ff; --red:#ff453a;
+    --uni-fill:#4a2321; --uni-ink:#f5f5f7; --off-fill:#3a3a3c;
     color-scheme:dark;
   }
 }
@@ -49,6 +53,7 @@
   --bg:#000000; --surface:#1d1d1f; --well:#2c2c2e;
   --ink:#f5f5f7; --ink-2:#a1a1a6; --ink-3:#86868b; --hairline:#424245;
   --blue:#0071e3; --link:#2997ff; --red:#ff453a;
+    --uni-fill:#4a2321; --uni-ink:#f5f5f7; --off-fill:#3a3a3c;
   color-scheme:dark;
 }
 
@@ -165,6 +170,13 @@ body{
 .key-txt{font-size:14px;line-height:1.42;min-width:0;flex:1 1 auto}
 .key-txt b{font-weight:600}
 .key-txt .zh{display:block;color:var(--ink-2);font-size:13px}
+.seg{margin-left:auto;display:inline-flex;background:var(--well);border-radius:9px;padding:2px;gap:2px;flex:none}
+.seg button{
+  font:inherit;font-size:13px;font-weight:500;letter-spacing:-.01em;cursor:pointer;
+  border:0;background:none;color:var(--ink-2);padding:5px 12px;border-radius:7px;white-space:nowrap;
+}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg .zh{font-size:12px;opacity:.8;margin-left:4px}
 
 /* ---------- controls: Apple's pill ---------- */
 .rail{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:22px}
@@ -199,7 +211,7 @@ td{padding:0}
   display:flex;align-items:center;justify-content:center;padding:0;cursor:default;
   font-variant-numeric:tabular-nums;letter-spacing:-.01em;
 }
-.d.tinted{color:var(--cell-ink);font-weight:500}
+.d.tinted{background:var(--fill);color:var(--cell-ink);font-weight:500}
 .d.blank{visibility:hidden}
 .d.wknd{color:var(--ink-3)}
 .d.has{cursor:pointer}
@@ -214,6 +226,14 @@ td{padding:0}
 }
 .d.uni{padding-bottom:5px}   /* lift the numeral clear of its dot */
 .d.today{box-shadow:0 0 0 2px var(--link);font-weight:600}
+
+/* The nine fills are the school's taxonomy. A parent sorts days into three:
+   wear the uniform, no school, ordinary. This view says only that, and keeps
+   the dot and the hatching so the meaning never rests on colour alone. The
+   school's own colours stay a toggle away for checking the printed sheet. */
+body[data-view="parent"] .d.tinted{background:none;color:var(--ink);font-weight:400}
+body[data-view="parent"] .d.uni{background:var(--uni-fill);color:var(--uni-ink);font-weight:500}
+body[data-view="parent"] .d.off{background:var(--off-fill);color:var(--ink-2)}
 .d.dim{opacity:.26}
 .d[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
 
@@ -592,15 +612,37 @@ rail.innerHTML =
    <button class="chip" id="clearBtn">Show all<span class="zh">全部顯示</span></button>`;
 document.getElementById('key').innerHTML = `
   <div class="key-item">
-    <span class="key-sw d tinted uni" style="background:${CATS.institutional.color}"></span>
+    <span class="key-sw d tinted uni" style="--fill:${CATS.institutional.color}"></span>
     <span class="key-txt"><b>Formal Uniform</b> — every school Monday, plus Mass and ceremony days
       <span class="zh">正式制服日：每個有上課的週一，加上彌撒與典禮當天</span></span>
   </div>
   <div class="key-item">
-    <span class="key-sw d tinted off" style="background:${CATS.holiday.color}"></span>
+    <span class="key-sw d tinted off" style="--fill:${CATS.holiday.color}"></span>
     <span class="key-txt"><b>No school</b> — holidays and the “No Students” staff days
       <span class="zh">不到校日：國定假日與教職員活動日</span></span>
+  </div>
+  <div class="seg" role="group" aria-label="Calendar colours · 月曆配色">
+    <button data-view="parent" aria-pressed="true">Parent<span class="zh">家長</span></button>
+    <button data-view="school" aria-pressed="false">School<span class="zh">學校分類</span></button>
   </div>`;
+
+/* Remembered per viewer; it is a convenience, so a browser that refuses
+   storage simply gets the default. */
+(function colourView(){
+  const KEY = 'disk.view';
+  const set = v => {
+    document.body.dataset.view = v;
+    document.querySelectorAll('.seg button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.view === v)));
+    try { localStorage.setItem(KEY, v); } catch (e) {}
+  };
+  let saved = 'parent';
+  try { saved = localStorage.getItem(KEY) || 'parent'; } catch (e) {}
+  set(saved === 'school' ? 'school' : 'parent');
+  document.querySelector('.seg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (b) set(b.dataset.view);
+  });
+})();
 
 /* ---------- month grids ---------- */
 const monthsEl = document.getElementById('months');
@@ -622,7 +664,7 @@ for (let i = 0; i < 10; i++) {
     let style = '';
     /* A category colour always wins over weekend shading: the SAT Weekends and
        a few parent events fall on Saturdays and would otherwise vanish. */
-    if (cat) { style = `background:${CATS[cat].color}`; cls.push('tinted'); }
+    if (cat) { style = `--fill:${CATS[cat].color}`; cls.push('tinted'); }
     else if (isWeekend(d)) cls.push('wknd');
     if (evs.length) cls.push('has');
     if (isOff(d)) cls.push('off');
