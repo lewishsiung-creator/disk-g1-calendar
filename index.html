@@ -294,6 +294,11 @@ footer .zh{color:var(--ink-3)}
     .qs{grid-template-columns:1fr}
   .status > div,.bk,.mo,.key{padding-left:18px;padding-right:18px}
   .chip{min-height:44px;padding:11px 18px}   /* iOS minimum tap target */
+  /* stranded right-aligned on a narrow card, and 29px tall — iOS puts a
+     segmented control full width and gives each half a real tap target */
+  .seg{margin-left:0;width:100%}
+  .seg button{flex:1;min-height:44px}
+  .more,.dl{min-height:44px}
   /* Stacked, these 13 pills cost a screen and a half before the first month.
      One swipeable row is the iOS pattern, and the three controls worth having
      on a phone come first — the colour filters scroll off to the right. */
