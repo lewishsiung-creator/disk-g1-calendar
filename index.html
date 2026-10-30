@@ -22,15 +22,21 @@
   --well:#f5f5f7;
   --ink:#1d1d1f;
   --ink-2:#6e6e73;
-  --ink-3:#86868b;
+  --ink-3:#6e6e73;       /* AA at 10-11px on white leaves no room for a third
+                            grey: in light the tertiary tier collapses onto
+                            the secondary one. Dark keeps its own, below. */
   --hairline:#d2d2d7;
   --blue:#0071e3;        /* Apple's filled-button blue */
   --link:#0066cc;        /* Apple's link blue */
-  --red:#ff3b30;         /* system red — semantic, kept apart from the accent */
+  --red:#ff3b30;         /* system red — markers only; too light to set text in */
+  --red-text:#d70015;    /* the same red, dark enough to read at 11px */
+  --red-fill:#d70015;    /* filled "no school" badge */
+  --red-ink:#ffffff;
   --cell-ink:#1d1d1f;    /* always dark: sits on the light pastel fills */
   --uni-fill:#ffdad6;    /* parent view: wear the uniform */
   --uni-ink:#1d1d1f;     /* flips with the theme, unlike --cell-ink */
   --off-fill:#e8e8ed;    /* parent view: no school */
+  --off-ink:#5a5a5f;     /* recessive, but still AA on that fill */
   --r-sm:12px;
   --r-card:18px;
   --pill:980px;
@@ -44,16 +50,18 @@
   :root:not([data-theme="light"]){
     --bg:#000000; --surface:#1d1d1f; --well:#2c2c2e;
     --ink:#f5f5f7; --ink-2:#a1a1a6; --ink-3:#86868b; --hairline:#424245;
-    --blue:#0071e3; --link:#2997ff; --red:#ff453a;
-    --uni-fill:#4a2321; --uni-ink:#f5f5f7; --off-fill:#3a3a3c;
+    --blue:#0071e3; --link:#2997ff; --red:#ff453a; --red-text:#ff453a;
+    --red-fill:#4a1512; --red-ink:#ff8a80;
+    --uni-fill:#4a2321; --uni-ink:#f5f5f7; --off-fill:#3a3a3c; --off-ink:#b8b8bd;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#000000; --surface:#1d1d1f; --well:#2c2c2e;
   --ink:#f5f5f7; --ink-2:#a1a1a6; --ink-3:#86868b; --hairline:#424245;
-  --blue:#0071e3; --link:#2997ff; --red:#ff453a;
-    --uni-fill:#4a2321; --uni-ink:#f5f5f7; --off-fill:#3a3a3c;
+  --blue:#0071e3; --link:#2997ff; --red:#ff453a; --red-text:#ff453a;
+    --red-fill:#4a1512; --red-ink:#ff8a80;
+    --uni-fill:#4a2321; --uni-ink:#f5f5f7; --off-fill:#3a3a3c; --off-ink:#b8b8bd;
   color-scheme:dark;
 }
 
@@ -233,7 +241,7 @@ td{padding:0}
    school's own colours stay a toggle away for checking the printed sheet. */
 body[data-view="parent"] .d.tinted{background:none;color:var(--ink);font-weight:400}
 body[data-view="parent"] .d.uni{background:var(--uni-fill);color:var(--uni-ink);font-weight:500}
-body[data-view="parent"] .d.off{background:var(--off-fill);color:var(--ink-2)}
+body[data-view="parent"] .d.off{background:var(--off-fill);color:var(--off-ink)}
 .d.dim{opacity:.26}
 .d[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
 
@@ -261,8 +269,8 @@ body[data-view="parent"] .d.off{background:var(--off-fill);color:var(--ink-2)}
   display:inline-block;font-size:11px;font-weight:500;border-radius:var(--pill);
   padding:1px 8px;margin-left:6px;vertical-align:1px;white-space:nowrap;letter-spacing:-.006em;
 }
-.tag.no{color:#fff;background:var(--red)}
-.tag.un{color:var(--red);box-shadow:inset 0 0 0 1px var(--red)}
+.tag.no{color:var(--red-ink);background:var(--red-fill)}
+.tag.un{color:var(--red-text);box-shadow:inset 0 0 0 1px var(--red-text)}
 .tag.sc{color:var(--ink-2);background:var(--well)}
 .stat .tag{vertical-align:4px}
 .inf{color:var(--link);font-weight:600;margin-left:4px;cursor:help}
